@@ -3,4 +3,8 @@ name = "bayer"
 version = "0.1.0"
 authors = ["David Wang <millimillenary@gmail.com>"]
 
+[lib]
+name = "bayer"
+crate-type = ["rlib", "dylib"]
+
 [dependencies]
