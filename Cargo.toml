@@ -10,3 +10,4 @@ crate-type = ["rlib", "dylib"]
 [dependencies]
 byteorder = "*"
 libc = "*"
+quick-error = "*"
