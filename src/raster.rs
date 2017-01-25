@@ -1,5 +1,7 @@
 //! Raster implementation.
 
+use std::slice;
+
 use ::RasterMut;
 
 /// Depth of a raster.
@@ -65,6 +67,42 @@ impl<'a> RasterMut<'a> {
             buf: buf,
         }
     }
+
+    /// Borrow a mutable u8 row slice.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the raster is not 8-bpp.
+    pub fn borrow_row_u8_mut(&mut self, y: usize)
+            -> &mut [u8] {
+        assert!(self.depth == RasterDepth::Depth8);
+        assert!(y < self.h);
+
+        let bytes_per_pixel = 3;
+        let start = self.stride * (self.y + y) + bytes_per_pixel * self.x;
+        let end = start + bytes_per_pixel * self.w;
+        &mut self.buf[start..end]
+    }
+
+    /// Borrow a mutable u16 row slice.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the raster is not 16-bpp.
+    pub fn borrow_row_u16_mut(&mut self, y: usize)
+            -> &mut [u16] {
+        assert!(self.depth == RasterDepth::Depth16);
+        assert!(y < self.h);
+
+        let bytes_per_pixel = 6;
+        let start = self.stride * (self.y + y) + bytes_per_pixel * self.x;
+        let end = start + bytes_per_pixel * self.w;
+        let s = &mut self.buf[start..end];
+
+        unsafe {
+            slice::from_raw_parts_mut(s.as_mut_ptr() as *mut u16, 3 * self.w)
+        }
+    }
 }
 
 impl RasterDepth {
@@ -88,5 +126,32 @@ mod tests {
         let mut buf = [0; 1];
         let _ = RasterMut::new(
                 ::std::usize::MAX, ::std::usize::MAX, RasterDepth::Depth8, &mut buf);
+    }
+
+    #[test]
+    fn test_borrow_row_u16_mut() {
+        let expected = [
+            0x00,0x00, 0x01,0x01, 0x02,0x02,
+            0x03,0x03, 0x04,0x04, 0x05,0x05,
+            0x06,0x06, 0x07,0x07, 0x08,0x08,
+            0x09,0x09, 0x0A,0x0A, 0x0B,0x0B ];
+
+        const IMG_W: usize = 4;
+        const IMG_H: usize = 1;
+        let mut buf = [0u8; 6 * IMG_W * IMG_H];
+
+        {
+            let mut dst = RasterMut::new(
+                    IMG_W, IMG_H, RasterDepth::Depth16, &mut buf);
+            let row = dst.borrow_row_u16_mut(0);
+
+            for (i, elt) in row.iter_mut().enumerate() {
+                // Work around different endians.
+                let i = i as u16;
+                *elt = (i << 8) | i;
+            }
+        }
+
+        assert_eq!(&buf[0..6 * IMG_W * IMG_H], &expected[..]);
     }
 }
