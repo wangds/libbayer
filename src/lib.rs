@@ -8,5 +8,19 @@ extern crate quick_error;
 
 pub use errcode::BayerError;
 pub use errcode::BayerResult;
+pub use raster::RasterDepth;
+
+/// Mutable raster structure.
+#[allow(dead_code)]
+pub struct RasterMut<'a> {
+    x: usize,
+    y: usize,
+    w: usize,
+    h: usize,
+    stride: usize,
+    depth: RasterDepth,
+    buf: &'a mut [u8],
+}
 
 mod errcode;
+mod raster;
