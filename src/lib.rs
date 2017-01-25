@@ -22,5 +22,7 @@ pub struct RasterMut<'a> {
     buf: &'a mut [u8],
 }
 
+pub mod ffi;
+
 mod errcode;
 mod raster;
