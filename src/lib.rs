@@ -24,5 +24,6 @@ pub struct RasterMut<'a> {
 
 pub mod ffi;
 
+mod bayer;
 mod errcode;
 mod raster;
