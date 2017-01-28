@@ -26,5 +26,6 @@ pub mod ffi;
 
 mod bayer;
 mod border_none;
+mod border_replicate;
 mod errcode;
 mod raster;
