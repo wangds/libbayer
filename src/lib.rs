@@ -25,6 +25,7 @@ pub struct RasterMut<'a> {
 pub mod ffi;
 
 mod bayer;
+mod border_mirror;
 mod border_none;
 mod border_replicate;
 mod errcode;
