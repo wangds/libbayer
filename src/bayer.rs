@@ -17,7 +17,6 @@ pub trait BayerRead16 {
 
 /// Read the exact number of bytes required to fill buf.
 /// For u8 source data.
-#[allow(dead_code)]
 pub fn read_exact_u8(r: &mut Read, buf: &mut [u8])
         -> BayerResult<()> {
     r.read_exact(buf)?;
@@ -26,7 +25,6 @@ pub fn read_exact_u8(r: &mut Read, buf: &mut [u8])
 
 /// Read the exact number of bytes required to fill buf.
 /// For u16 big-endian source data.
-#[allow(dead_code)]
 pub fn read_exact_u16be(r: &mut Read, buf: &mut [u16])
         -> BayerResult<()> {
     for i in 0..buf.len() {
@@ -37,7 +35,6 @@ pub fn read_exact_u16be(r: &mut Read, buf: &mut [u16])
 
 /// Read the exact number of bytes required to fill buf.
 /// For u16 little-endian source data.
-#[allow(dead_code)]
 pub fn read_exact_u16le(r: &mut Read, buf: &mut [u16])
         -> BayerResult<()> {
     for i in 0..buf.len() {
