@@ -6,6 +6,8 @@ extern crate libc;
 #[macro_use]
 extern crate quick_error;
 
+pub use bayer::BayerDepth;
+pub use bayer::CFA;
 pub use errcode::BayerError;
 pub use errcode::BayerResult;
 pub use raster::RasterDepth;
