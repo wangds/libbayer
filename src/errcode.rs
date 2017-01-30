@@ -13,6 +13,13 @@ pub enum BayerError {
         description("No good")
     }
 
+    WrongResolution {
+        description("Wrong resolution")
+    }
+    WrongDepth {
+        description("Wrong depth")
+    }
+
     Io(err: io::Error) {
         from()
         description(err.description())
