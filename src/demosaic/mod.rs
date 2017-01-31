@@ -6,8 +6,18 @@ use ::{BayerDepth,RasterDepth};
 #[derive(Clone,Copy,Debug,Eq,PartialEq)]
 pub enum Demosaic {
     None,
+    NearestNeighbour,
 }
 
+macro_rules! rotate {
+    ($v0:ident <- $v1:ident) => {{
+        let rot = $v0;
+        $v0 = $v1;
+        $v1 = rot;
+    }};
+}
+
+pub mod nearestneighbour;
 pub mod none;
 
 /// Check if the image depth and the raster depth are compatible.

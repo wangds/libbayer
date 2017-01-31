@@ -64,5 +64,6 @@ pub fn run_demosaic(r: &mut Read,
         -> BayerResult<()> {
     match alg {
         Demosaic::None => demosaic::none::run(r, depth, cfa, dst),
+        Demosaic::NearestNeighbour => demosaic::nearestneighbour::run(r, depth, cfa, dst),
     }
 }
