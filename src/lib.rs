@@ -65,5 +65,6 @@ pub fn run_demosaic(r: &mut Read,
     match alg {
         Demosaic::None => demosaic::none::run(r, depth, cfa, dst),
         Demosaic::NearestNeighbour => demosaic::nearestneighbour::run(r, depth, cfa, dst),
+        Demosaic::Linear => demosaic::linear::run(r, depth, cfa, dst),
     }
 }

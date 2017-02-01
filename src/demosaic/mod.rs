@@ -7,6 +7,7 @@ use ::{BayerDepth,RasterDepth};
 pub enum Demosaic {
     None,
     NearestNeighbour,
+    Linear,
 }
 
 macro_rules! rotate {
@@ -15,8 +16,15 @@ macro_rules! rotate {
         $v0 = $v1;
         $v1 = rot;
     }};
+    ($v0:ident <- $v1:ident <- $v2:ident) => {{
+        let rot = $v0;
+        $v0 = $v1;
+        $v1 = $v2;
+        $v2 = rot;
+    }};
 }
 
+pub mod linear;
 pub mod nearestneighbour;
 pub mod none;
 
