@@ -66,5 +66,6 @@ pub fn run_demosaic(r: &mut Read,
         Demosaic::None => demosaic::none::run(r, depth, cfa, dst),
         Demosaic::NearestNeighbour => demosaic::nearestneighbour::run(r, depth, cfa, dst),
         Demosaic::Linear => demosaic::linear::run(r, depth, cfa, dst),
+        Demosaic::Cubic => demosaic::cubic::run(r, depth, cfa, dst),
     }
 }
