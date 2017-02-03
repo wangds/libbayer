@@ -26,7 +26,7 @@ pub struct BorderReplicate16BE(usize, usize, usize);
 pub struct BorderReplicate16LE(usize, usize, usize);
 
 macro_rules! fill_row {
-    ($dst:ident, $x1:expr, $x2:expr, $x3:expr) => {
+    ($dst:ident, $x1:expr, $x2:expr, $x3:expr) => {{
         let mut i;
 
         // Left border.
@@ -55,11 +55,10 @@ macro_rules! fill_row {
         if i == $x3 - 1 {
             $dst[i] = r0;
         }
-    }
+    }}
 }
 
 impl BorderReplicate8 {
-    #[allow(dead_code)]
     pub fn new(width: usize, padding: usize) -> Self {
         let x1 = padding;
         let x2 = x1.checked_add(width).expect("overflow");
@@ -81,7 +80,6 @@ impl BayerRead8 for BorderReplicate8 {
 }
 
 impl BorderReplicate16BE {
-    #[allow(dead_code)]
     pub fn new(width: usize, padding: usize) -> Self {
         let x1 = padding;
         let x2 = x1.checked_add(width).expect("overflow");
@@ -103,7 +101,6 @@ impl BayerRead16 for BorderReplicate16BE {
 }
 
 impl BorderReplicate16LE {
-    #[allow(dead_code)]
     pub fn new(width: usize, padding: usize) -> Self {
         let x1 = padding;
         let x2 = x1.checked_add(width).expect("overflow");

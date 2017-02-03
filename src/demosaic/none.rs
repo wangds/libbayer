@@ -25,7 +25,7 @@ pub fn run(r: &mut Read,
 }
 
 macro_rules! apply_kernel_row {
-    ($row:ident, $curr:ident, $cfa:expr, $w:expr) => {
+    ($row:ident, $curr:expr, $cfa:expr, $w:expr) => {
         let mut cfa_x = $cfa;
         for i in 0..$w {
             apply_kernel!($row, $curr, cfa_x, i);
@@ -35,7 +35,7 @@ macro_rules! apply_kernel_row {
 }
 
 macro_rules! apply_kernel {
-    ($row:ident, $curr:ident, $cfa:expr, $i:expr) => {
+    ($row:ident, $curr:expr, $cfa:expr, $i:expr) => {
         match $cfa {
             CFA::BGGR => {
                 $row[3 * $i + 0] = 0;

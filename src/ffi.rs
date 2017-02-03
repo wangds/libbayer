@@ -14,13 +14,13 @@ pub struct CRasterMut;
 
 // Print with "file:line - " prefix, for more informative error messages.
 macro_rules! printerrorln {
-    ($e:expr) => {
+    ($e:expr) => {{
         println!("{}:{} - {}", file!(), line!(), $e);
-    };
-    ($fmt:expr, $arg:tt) => {
+    }};
+    ($fmt:expr, $arg:tt) => {{
         print!("{}:{} - ", file!(), line!());
         println!($fmt, $arg);
-    };
+    }};
 }
 
 unsafe fn transmute_raster_mut<'a>(dst: *mut CRasterMut)

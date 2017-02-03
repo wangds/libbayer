@@ -16,7 +16,6 @@ pub use errcode::BayerResult;
 pub use raster::RasterDepth;
 
 /// Mutable raster structure.
-#[allow(dead_code)]
 pub struct RasterMut<'a> {
     x: usize,
     y: usize,

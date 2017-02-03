@@ -27,7 +27,7 @@ pub fn run(r: &mut Read,
 }
 
 macro_rules! apply_kernel_row {
-    ($row:ident, $prev:ident, $curr:ident, $cfa:expr, $w:expr) => {{
+    ($row:ident, $prev:expr, $curr:expr, $cfa:expr, $w:expr) => {{
         let mut cfa_x = $cfa;
         for i in 0..$w {
             match cfa_x {
@@ -42,7 +42,7 @@ macro_rules! apply_kernel_row {
 }
 
 macro_rules! apply_kernel_c {
-    ($row:ident, $prev:ident, $curr:ident, $cfa:expr, $i:expr) => {{
+    ($row:ident, $prev:expr, $curr:expr, $cfa:expr, $i:expr) => {{
         // current = B/R, diagonal = R/B.
         let (c, d) = if $cfa == CFA::BGGR { (2, 0) } else { (0, 2) };
         let j = $i + PADDING;
@@ -54,7 +54,7 @@ macro_rules! apply_kernel_c {
 }
 
 macro_rules! apply_kernel_g {
-    ($row:ident, $prev:ident, $curr:ident, $cfa:expr, $i:expr) => {{
+    ($row:ident, $prev:expr, $curr:expr, $cfa:expr, $i:expr) => {{
         // horizontal = B/R, vertical = R/G.
         let (h, v) = if $cfa == CFA::GBRG { (2, 0) } else { (0, 2) };
         let j = $i + PADDING;

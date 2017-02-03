@@ -10,7 +10,6 @@ pub struct BorderNone16BE;
 pub struct BorderNone16LE;
 
 impl BorderNone8 {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         BorderNone8
     }
@@ -24,7 +23,6 @@ impl BayerRead8 for BorderNone8 {
 }
 
 impl BorderNone16BE {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         BorderNone16BE
     }
@@ -38,7 +36,6 @@ impl BayerRead16 for BorderNone16BE {
 }
 
 impl BorderNone16LE {
-    #[allow(dead_code)]
     pub fn new() -> Self {
         BorderNone16LE
     }

@@ -48,7 +48,6 @@ macro_rules! apply_kernel_row {
                 CFA::GBRG | CFA::GRBG =>
                     apply_kernel_g!($T; $row, $prev, $curr, $next, cfa_x, i),
             }
-
             cfa_x = cfa_x.next_x();
         }
     }}

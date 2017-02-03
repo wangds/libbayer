@@ -26,7 +26,7 @@ pub struct BorderMirror16BE(usize, usize, usize);
 pub struct BorderMirror16LE(usize, usize, usize);
 
 macro_rules! fill_row {
-    ($dst:ident, $x1:expr, $x2:expr, $x3:expr) => {
+    ($dst:ident, $x1:expr, $x2:expr, $x3:expr) => {{
         let mut i;
         let mut j;
 
@@ -47,11 +47,10 @@ macro_rules! fill_row {
             i = i + 1;
             j = j - 1;
         }
-    }
+    }}
 }
 
 impl BorderMirror8 {
-    #[allow(dead_code)]
     pub fn new(width: usize, padding: usize) -> Self {
         let x1 = padding;
         let x2 = x1.checked_add(width).expect("overflow");
@@ -73,7 +72,6 @@ impl BayerRead8 for BorderMirror8 {
 }
 
 impl BorderMirror16BE {
-    #[allow(dead_code)]
     pub fn new(width: usize, padding: usize) -> Self {
         let x1 = padding;
         let x2 = x1.checked_add(width).expect("overflow");
@@ -95,7 +93,6 @@ impl BayerRead16 for BorderMirror16BE {
 }
 
 impl BorderMirror16LE {
-    #[allow(dead_code)]
     pub fn new(width: usize, padding: usize) -> Self {
         let x1 = padding;
         let x2 = x1.checked_add(width).expect("overflow");
