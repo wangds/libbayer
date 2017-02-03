@@ -13,4 +13,5 @@ libc = "*"
 quick-error = "*"
 
 [dev-dependencies]
-sdl2 = "*"
+flic = "*"
+sdl2 = { version = "*", features = ["image"] }
