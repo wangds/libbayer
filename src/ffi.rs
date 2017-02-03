@@ -1,11 +1,13 @@
 //! Foreign function interface.
 
+use std::io::{Cursor,Read};
 use std::mem;
 use std::ptr;
 use std::slice;
 use libc::{c_uchar,c_uint,size_t};
 
-use ::{RasterDepth,RasterMut};
+use ::{BayerDepth,BayerError,BayerResult,CFA,RasterDepth,RasterMut};
+use demosaic;
 
 /// Dummy opaque structure, equivalent to RasterMut<'a>.
 pub struct CRasterMut;
@@ -20,6 +22,112 @@ macro_rules! printerrorln {
         println!($fmt, $arg);
     };
 }
+
+unsafe fn transmute_raster_mut<'a>(dst: *mut CRasterMut)
+        -> &'a mut RasterMut<'a> {
+    let ptr: *mut RasterMut = mem::transmute(dst);
+    &mut *ptr
+}
+
+fn run_demosaic<F>(file: &'static str, line: u32,
+        run: F,
+        src: *const c_uchar, src_len: size_t,
+        depth: c_uint, be: c_uint, cfa: c_uint,
+        dst: *mut CRasterMut)
+        -> c_uint
+        where F: FnOnce(&mut Read, BayerDepth, CFA, &mut RasterMut) -> BayerResult<()> {
+    if src.is_null() || dst.is_null() {
+        println!("{} {} - bad input parameters", file, line);
+        return 1;
+    }
+
+    let depth = match (depth, be) {
+        (8, _) => BayerDepth::Depth8,
+        (16, 0) => BayerDepth::Depth16LE,
+        (16, _) => BayerDepth::Depth16BE,
+        _ => {
+            println!("{} {} - invalid depth", file, line);
+            return 2;
+        }
+    };
+
+    let cfa = match cfa {
+        0 => CFA::BGGR,
+        1 => CFA::GBRG,
+        2 => CFA::GRBG,
+        3 => CFA::RGGB,
+        _ => {
+            println!("{} {} - invalid cfa", file, line);
+            return 1;
+        }
+    };
+
+    let src_slice = unsafe{ slice::from_raw_parts(src, src_len) };
+    let dst_raster = unsafe{ transmute_raster_mut(dst) };
+
+    match run(&mut Cursor::new(&src_slice[..]), depth, cfa, dst_raster) {
+        Ok(_) => 0,
+        Err(BayerError::WrongResolution) => 2,
+        Err(BayerError::WrongDepth) => 3,
+        Err(_) => 1,
+    }
+}
+
+/*--------------------------------------------------------------*/
+/* Demosaicing algorithms                                       */
+/*--------------------------------------------------------------*/
+
+/// Demosaicing without any interpolation.
+#[no_mangle]
+pub extern "C" fn bayerrs_demosaic_none(
+        src: *const c_uchar, src_len: size_t,
+        depth: c_uint, be: c_uint, cfa: c_uint,
+        dst: *mut CRasterMut)
+        -> c_uint {
+    run_demosaic(file!(), line!(),
+            demosaic::none::run,
+            src, src_len, depth, be, cfa, dst)
+}
+
+/// Demosaicing using nearest neighbour interpolation.
+#[no_mangle]
+pub extern "C" fn bayerrs_demosaic_nearest_neighbour(
+        src: *const c_uchar, src_len: size_t,
+        depth: c_uint, be: c_uint, cfa: c_uint,
+        dst: *mut CRasterMut)
+        -> c_uint {
+    run_demosaic(file!(), line!(),
+            demosaic::nearestneighbour::run,
+            src, src_len, depth, be, cfa, dst)
+}
+
+/// Demosaicing using linear interpolation.
+#[no_mangle]
+pub extern "C" fn bayerrs_demosaic_linear(
+        src: *const c_uchar, src_len: size_t,
+        depth: c_uint, be: c_uint, cfa: c_uint,
+        dst: *mut CRasterMut)
+        -> c_uint {
+    run_demosaic(file!(), line!(),
+            demosaic::linear::run,
+            src, src_len, depth, be, cfa, dst)
+}
+
+/// Demosaicing using cubic interpolation.
+#[no_mangle]
+pub extern "C" fn bayerrs_demosaic_cubic(
+        src: *const c_uchar, src_len: size_t,
+        depth: c_uint, be: c_uint, cfa: c_uint,
+        dst: *mut CRasterMut)
+        -> c_uint {
+    run_demosaic(file!(), line!(),
+            demosaic::cubic::run,
+            src, src_len, depth, be, cfa, dst)
+}
+
+/*--------------------------------------------------------------*/
+/* Raster                                                       */
+/*--------------------------------------------------------------*/
 
 /// Allocate a new raster.
 #[no_mangle]
