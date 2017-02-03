@@ -2,16 +2,30 @@
 name = "bayer"
 version = "0.1.0"
 authors = ["David Wang <millimillenary@gmail.com>"]
+homepage = "https://github.com/wangds/libbayer.git"
+repository = "https://github.com/wangds/libbayer.git"
+documentation = "https://docs.rs/bayer/"
+description = "Algorithms for demosaicing Bayer images."
+license = "MIT"
+readme = "README.md"
+keywords = ["bayer", "cfa", "demosaic"]
+categories = ["multimedia::images"]
 
 [lib]
 name = "bayer"
 crate-type = ["rlib", "dylib"]
+test = true
+doctest = true
+doc = true
 
 [dependencies]
-byteorder = "*"
-libc = "*"
-quick-error = "*"
+byteorder = "1.0"
+libc = "0.2"
+quick-error = "1.1"
 
 [dev-dependencies]
-flic = "*"
-sdl2 = { version = "*", features = ["image"] }
+flic = "0.1"
+sdl2 = { version = "0.28", features = ["image"] }
+
+[badges]
+travis-ci = { repository = "wangds/libbayer" }
