@@ -18,6 +18,9 @@ test = true
 doctest = true
 doc = true
 
+[features]
+bench = []
+
 [dependencies]
 byteorder = "1.0"
 libc = "0.2"
