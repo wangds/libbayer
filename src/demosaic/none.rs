@@ -27,6 +27,9 @@ pub fn run(r: &mut Read,
 macro_rules! apply_kernel_row {
     ($row:ident, $curr:expr, $cfa:expr, $w:expr) => {
         let mut cfa_x = $cfa;
+        for e in $row.iter_mut() {
+            *e = 0;
+        }
         for i in 0..$w {
             apply_kernel!($row, $curr, cfa_x, i);
             cfa_x = cfa_x.next_x();
@@ -38,19 +41,13 @@ macro_rules! apply_kernel {
     ($row:ident, $curr:expr, $cfa:expr, $i:expr) => {
         match $cfa {
             CFA::BGGR => {
-                $row[3 * $i + 0] = 0;
-                $row[3 * $i + 1] = 0;
                 $row[3 * $i + 2] = $curr[$i];
             },
             CFA::GBRG | CFA::GRBG => {
-                $row[3 * $i + 0] = 0;
                 $row[3 * $i + 1] = $curr[$i];
-                $row[3 * $i + 2] = 0;
             },
             CFA::RGGB => {
                 $row[3 * $i + 0] = $curr[$i];
-                $row[3 * $i + 1] = 0;
-                $row[3 * $i + 2] = 0;
             },
         }
     }
