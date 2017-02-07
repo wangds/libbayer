@@ -28,15 +28,22 @@ pub fn run(r: &mut Read,
 
 macro_rules! apply_kernel_row {
     ($row:ident, $prev:expr, $curr:expr, $cfa:expr, $w:expr) => {{
-        let mut cfa_x = $cfa;
-        for i in 0..$w {
-            match cfa_x {
-                CFA::BGGR | CFA::RGGB =>
-                    apply_kernel_c!($row, $prev, $curr, cfa_x, i),
-                CFA::GBRG | CFA::GRBG =>
-                    apply_kernel_g!($row, $prev, $curr, cfa_x, i),
-            }
-            cfa_x = cfa_x.next_x();
+        let (mut i, cfa_c, cfa_g) =
+            if $cfa == CFA::BGGR || $cfa == CFA::RGGB {
+                (0, $cfa, $cfa.next_x())
+            } else {
+                apply_kernel_g!($row, $prev, $curr, $cfa, 0);
+                (1, $cfa.next_x(), $cfa)
+            };
+
+        while i + 1 < $w {
+            apply_kernel_c!($row, $prev, $curr, cfa_c, i);
+            apply_kernel_g!($row, $prev, $curr, cfa_g, i + 1);
+            i = i + 2;
+        }
+
+        if i < $w {
+            apply_kernel_c!($row, $prev, $curr, cfa_c, i);
         }
     }}
 }

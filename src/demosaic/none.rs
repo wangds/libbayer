@@ -25,32 +25,45 @@ pub fn run(r: &mut Read,
 }
 
 macro_rules! apply_kernel_row {
-    ($row:ident, $curr:expr, $cfa:expr, $w:expr) => {
-        let mut cfa_x = $cfa;
+    ($row:ident, $curr:expr, $cfa:expr, $w:expr) => {{
         for e in $row.iter_mut() {
             *e = 0;
         }
-        for i in 0..$w {
-            apply_kernel!($row, $curr, cfa_x, i);
-            cfa_x = cfa_x.next_x();
+
+        let (mut i, cfa_c) =
+            if $cfa == CFA::BGGR || $cfa == CFA::RGGB {
+                (0, $cfa)
+            } else {
+                apply_kernel_g!($row, $curr, 0);
+                (1, $cfa.next_x())
+            };
+
+        while i + 1 < $w {
+            apply_kernel_c!($row, $curr, cfa_c, i);
+            apply_kernel_g!($row, $curr, i + 1);
+            i = i + 2;
         }
-    }
+
+        if i < $w {
+            apply_kernel_c!($row, $curr, cfa_c, i);
+        }
+    }}
 }
 
-macro_rules! apply_kernel {
-    ($row:ident, $curr:expr, $cfa:expr, $i:expr) => {
-        match $cfa {
-            CFA::BGGR => {
-                $row[3 * $i + 2] = $curr[$i];
-            },
-            CFA::GBRG | CFA::GRBG => {
-                $row[3 * $i + 1] = $curr[$i];
-            },
-            CFA::RGGB => {
-                $row[3 * $i + 0] = $curr[$i];
-            },
+macro_rules! apply_kernel_c {
+    ($row:ident, $curr:expr, $cfa:expr, $i:expr) => {{
+        if $cfa == CFA::BGGR {
+            $row[3 * $i + 2] = $curr[$i];
+        } else {
+            $row[3 * $i + 0] = $curr[$i];
         }
-    }
+    }}
+}
+
+macro_rules! apply_kernel_g {
+    ($row:ident, $curr:expr, $i:expr) => {{
+        $row[3 * $i + 1] = $curr[$i];
+    }}
 }
 
 /*--------------------------------------------------------------*/
