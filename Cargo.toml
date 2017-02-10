@@ -1,6 +1,6 @@
 [package]
 name = "bayer"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["David Wang <millimillenary@gmail.com>"]
 homepage = "https://github.com/wangds/libbayer.git"
 repository = "https://github.com/wangds/libbayer.git"
