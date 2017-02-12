@@ -3,6 +3,9 @@
 extern crate byteorder;
 extern crate libc;
 
+#[cfg(feature = "rayon")]
+extern crate rayon;
+
 #[macro_use]
 extern crate quick_error;
 
