@@ -23,6 +23,12 @@
 use std::cmp::min;
 use std::io::Read;
 
+#[cfg(feature = "rayon")]
+use std::slice;
+
+#[cfg(feature = "rayon")]
+use rayon::prelude::*;
+
 use ::{BayerDepth,BayerError,BayerResult,CFA,RasterMut};
 use bayer::{BayerRead8,BayerRead16};
 use border_mirror::*;
@@ -140,7 +146,118 @@ macro_rules! apply_kernel_g {
 }
 
 /*--------------------------------------------------------------*/
+/* Rayon                                                        */
+/*--------------------------------------------------------------*/
 
+#[cfg(feature = "rayon")]
+#[allow(unused_parens)]
+fn debayer_u8(r: &mut Read, cfa: CFA, dst: &mut RasterMut)
+        -> BayerResult<()> {
+    let (w, h) = (dst.w, dst.h);
+    let mut data = vec![0u8; (2 * PADDING + w) * (2 * PADDING + h)];
+
+    // Read all data.
+    {
+        let stride = 2 * PADDING + w;
+        let rdr = BorderMirror8::new(w, PADDING);
+        for mut row in data.chunks_mut(stride).skip(PADDING).take(h) {
+            rdr.read_line(r, &mut row)?;
+        }
+
+        {
+            let (top, src) = data.split_at_mut(stride * PADDING);
+            top[(stride * 0)..(stride * 1)].copy_from_slice(&src[(stride * 3)..(stride * 4)]);
+            top[(stride * 1)..(stride * 2)].copy_from_slice(&src[(stride * 2)..(stride * 3)]);
+            top[(stride * 2)..(stride * 3)].copy_from_slice(&src[(stride * 1)..(stride * 2)]);
+        }
+
+        {
+            let (src, bottom) = data.split_at_mut(stride * (h + PADDING));
+            let yy = PADDING + h;
+            bottom[(stride * 0)..(stride * 1)].copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
+            bottom[(stride * 1)..(stride * 2)].copy_from_slice(&src[(stride * (yy - 3))..(stride * (yy - 2))]);
+            bottom[(stride * 2)..(stride * 3)].copy_from_slice(&src[(stride * (yy - 4))..(stride * (yy - 3))]);
+        }
+    }
+
+    dst.buf.par_chunks_mut(dst.stride).enumerate()
+            .for_each(|(y, mut row)| {
+        let stride = 2 * PADDING + w;
+        let prv3 = &data[(stride * (PADDING + y - 3)) .. (stride * (PADDING + y - 2))];
+        let prv2 = &data[(stride * (PADDING + y - 2)) .. (stride * (PADDING + y - 1))];
+        let prv1 = &data[(stride * (PADDING + y - 1)) .. (stride * (PADDING + y + 0))];
+        let curr = &data[(stride * (PADDING + y + 0)) .. (stride * (PADDING + y + 1))];
+        let nxt1 = &data[(stride * (PADDING + y + 1)) .. (stride * (PADDING + y + 2))];
+        let nxt2 = &data[(stride * (PADDING + y + 2)) .. (stride * (PADDING + y + 3))];
+        let nxt3 = &data[(stride * (PADDING + y + 3)) .. (stride * (PADDING + y + 4))];
+        let cfa_y = if y % 2 == 0 { cfa } else { cfa.next_y() };
+
+        apply_kernel_row!(u8; row, prv3, prv2, prv1, curr, nxt1, nxt2, nxt3, cfa_y, w);
+    });
+
+    Ok(())
+}
+
+#[cfg(feature = "rayon")]
+#[allow(unused_parens)]
+fn debayer_u16(r: &mut Read, be: bool, cfa: CFA, dst: &mut RasterMut)
+        -> BayerResult<()> {
+    let (w, h) = (dst.w, dst.h);
+    let mut data = vec![0u16; (2 * PADDING + w) * (2 * PADDING + h)];
+
+    // Read all data.
+    {
+        let stride = 2 * PADDING + w;
+        let rdr: Box<BayerRead16> = if be {
+            Box::new(BorderMirror16BE::new(w, PADDING))
+        } else {
+            Box::new(BorderMirror16LE::new(w, PADDING))
+        };
+
+        for mut row in data.chunks_mut(stride).skip(PADDING).take(h) {
+            rdr.read_line(r, &mut row)?;
+        }
+
+        {
+            let (top, src) = data.split_at_mut(stride * PADDING);
+            top[(stride * 0)..(stride * 1)].copy_from_slice(&src[(stride * 3)..(stride * 4)]);
+            top[(stride * 1)..(stride * 2)].copy_from_slice(&src[(stride * 2)..(stride * 3)]);
+            top[(stride * 2)..(stride * 3)].copy_from_slice(&src[(stride * 1)..(stride * 2)]);
+        }
+
+        {
+            let (src, bottom) = data.split_at_mut(stride * (h + PADDING));
+            let yy = PADDING + h;
+            bottom[(stride * 0)..(stride * 1)].copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
+            bottom[(stride * 1)..(stride * 2)].copy_from_slice(&src[(stride * (yy - 3))..(stride * (yy - 2))]);
+            bottom[(stride * 2)..(stride * 3)].copy_from_slice(&src[(stride * (yy - 4))..(stride * (yy - 3))]);
+        }
+    }
+
+    dst.buf.par_chunks_mut(dst.stride).enumerate()
+            .for_each(|(y, mut row)| {
+        let stride = 2 * PADDING + w;
+        let prv3 = &data[(stride * (PADDING + y - 3)) .. (stride * (PADDING + y - 2))];
+        let prv2 = &data[(stride * (PADDING + y - 2)) .. (stride * (PADDING + y - 1))];
+        let prv1 = &data[(stride * (PADDING + y - 1)) .. (stride * (PADDING + y + 0))];
+        let curr = &data[(stride * (PADDING + y + 0)) .. (stride * (PADDING + y + 1))];
+        let nxt1 = &data[(stride * (PADDING + y + 1)) .. (stride * (PADDING + y + 2))];
+        let nxt2 = &data[(stride * (PADDING + y + 2)) .. (stride * (PADDING + y + 3))];
+        let nxt3 = &data[(stride * (PADDING + y + 3)) .. (stride * (PADDING + y + 4))];
+        let cfa_y = if y % 2 == 0 { cfa } else { cfa.next_y() };
+
+        let row16 = unsafe{ slice::from_raw_parts_mut(row.as_mut_ptr() as *mut u16, row.len() / 2) };
+        apply_kernel_row!(u16; row16, prv3, prv2, prv1, curr, nxt1, nxt2, nxt3, cfa_y, w);
+    });
+
+    Ok(())
+}
+
+/*--------------------------------------------------------------*/
+/* Naive                                                        */
+/*--------------------------------------------------------------*/
+
+#[cfg(not(feature = "rayon"))]
 #[allow(unused_parens)]
 fn debayer_u8(r: &mut Read, cfa: CFA, dst: &mut RasterMut)
         -> BayerResult<()> {
@@ -199,6 +316,7 @@ fn debayer_u8(r: &mut Read, cfa: CFA, dst: &mut RasterMut)
     Ok(())
 }
 
+#[cfg(not(feature = "rayon"))]
 #[allow(unused_parens)]
 fn debayer_u16(r: &mut Read, be: bool, cfa: CFA, dst: &mut RasterMut)
         -> BayerResult<()> {
