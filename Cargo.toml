@@ -1,6 +1,6 @@
 [package]
 name = "bayer"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["David Wang <millimillenary@gmail.com>"]
 homepage = "https://github.com/wangds/libbayer.git"
 repository = "https://github.com/wangds/libbayer.git"
@@ -30,7 +30,7 @@ quick-error = "1.1"
 
 [dev-dependencies]
 flic = "0.1"
-sdl2 = { version = "0.28", features = ["image"] }
+sdl2 = { version = "0.29", features = ["image"] }
 
 [badges]
 travis-ci = { repository = "wangds/libbayer" }
