@@ -58,13 +58,7 @@ impl<'a> RasterMut<'a> {
         assert_eq!(stride % bytes_per_pixel, 0);
 
         RasterMut {
-            x: x,
-            y: y,
-            w: w,
-            h: h,
-            stride: stride,
-            depth: depth,
-            buf: buf,
+            x, y, w, h, stride, depth, buf,
         }
     }
 
