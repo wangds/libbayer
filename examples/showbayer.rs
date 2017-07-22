@@ -52,10 +52,11 @@ fn main() {
         .opengl()
         .build().unwrap();
 
-    let mut renderer = window.renderer().build().unwrap();
+    let mut canvas = window.into_canvas().build().unwrap();
     let mut event_pump = sdl.event_pump().unwrap();
 
-    let mut texture = renderer.create_texture_streaming(
+    let texture_creator = canvas.texture_creator();
+    let mut texture = texture_creator.create_texture_streaming(
             PixelFormatEnum::RGB24,
             bayer_w as u32, bayer_h as u32).unwrap();
 
@@ -126,7 +127,7 @@ fn main() {
                         &mut buf, &mut texture);
             }
 
-            present_to_screen(&mut renderer, &texture);
+            present_to_screen(&mut canvas, &texture);
         }
     }
 }
@@ -277,9 +278,9 @@ fn render_to_texture(
 }
 
 fn present_to_screen(
-        renderer: &mut sdl2::render::Renderer,
+        canvas: &mut sdl2::render::WindowCanvas,
         texture: &sdl2::render::Texture) {
-    renderer.clear();
-    let _ = renderer.copy(&texture, None, None);
-    renderer.present();
+    canvas.clear();
+    let _ = canvas.copy(&texture, None, None);
+    canvas.present();
 }
