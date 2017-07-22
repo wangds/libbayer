@@ -1,6 +1,6 @@
 [package]
 name = "bayer"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["David Wang <millimillenary@gmail.com>"]
 homepage = "https://github.com/wangds/libbayer.git"
 repository = "https://github.com/wangds/libbayer.git"
@@ -23,9 +23,9 @@ default = ["rayon"]
 bench = []
 
 [dependencies]
-byteorder = "1.0"
+byteorder = "1.1"
 libc = "0.2"
-rayon = { version = "0.7", optional = true }
+rayon = { version = "0.8", optional = true }
 quick-error = "1.2"
 
 [dev-dependencies]
