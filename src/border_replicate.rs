@@ -10,8 +10,8 @@
 
 use std::io::Read;
 
-use ::BayerResult;
-use bayer::*;
+use crate::bayer::*;
+use crate::BayerResult;
 
 /// Tuple structs (x1, x2, x3) designating the different sub-regions
 /// of the output lines.
@@ -40,7 +40,7 @@ macro_rules! fill_row {
         while i < $x1 {
             $dst[i + 0] = r0;
             $dst[i + 1] = g0;
-            i = i + 2;
+            i += 2;
         }
 
         // Right border.
@@ -50,12 +50,12 @@ macro_rules! fill_row {
         while i + 1 < $x3 {
             $dst[i + 0] = r0;
             $dst[i + 1] = g0;
-            i = i + 2;
+            i += 2;
         }
         if i == $x3 - 1 {
             $dst[i] = r0;
         }
-    }}
+    }};
 }
 
 impl BorderReplicate8 {
@@ -70,8 +70,7 @@ impl BorderReplicate8 {
 }
 
 impl BayerRead8 for BorderReplicate8 {
-    fn read_line(&self, r: &mut Read, dst: &mut [u8])
-            -> BayerResult<()> {
+    fn read_line(&self, r: &mut dyn Read, dst: &mut [u8]) -> BayerResult<()> {
         let BorderReplicate8(x1, x2, x3) = *self;
         read_exact_u8(r, &mut dst[x1..x2])?;
         fill_row!(dst, x1, x2, x3);
@@ -91,8 +90,7 @@ impl BorderReplicate16BE {
 }
 
 impl BayerRead16 for BorderReplicate16BE {
-    fn read_line(&self, r: &mut Read, dst: &mut [u16])
-            -> BayerResult<()> {
+    fn read_line(&self, r: &mut dyn Read, dst: &mut [u16]) -> BayerResult<()> {
         let BorderReplicate16BE(x1, x2, x3) = *self;
         read_exact_u16be(r, &mut dst[x1..x2])?;
         fill_row!(dst, x1, x2, x3);
@@ -112,8 +110,7 @@ impl BorderReplicate16LE {
 }
 
 impl BayerRead16 for BorderReplicate16LE {
-    fn read_line(&self, r: &mut Read, dst: &mut [u16])
-            -> BayerResult<()> {
+    fn read_line(&self, r: &mut dyn Read, dst: &mut [u16]) -> BayerResult<()> {
         let BorderReplicate16LE(x1, x2, x3) = *self;
         read_exact_u16le(r, &mut dst[x1..x2])?;
         fill_row!(dst, x1, x2, x3);
@@ -123,19 +120,17 @@ impl BayerRead16 for BorderReplicate16LE {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-    use bayer::BayerRead8;
     use super::BorderReplicate8;
+    use crate::bayer::BayerRead8;
+    use std::io::Cursor;
 
     #[test]
     fn test_replicate_even() {
-        let src = [
-            1,2, 3,4, 5,6 ];
+        let src = [1, 2, 3, 4, 5, 6];
 
         let expected = [
-            1,2, 1,2,
-            /*-----*/ 1,2, 3,4, 5,6,
-            /*--------------------*/ 5,6, 5,6 ];
+            1, 2, 1, 2, /*-----*/ 1, 2, 3, 4, 5, 6, /*--------------------*/ 5, 6, 5, 6,
+        ];
 
         let rdr = BorderReplicate8::new(6, 4);
         let mut buf = [0u8; 4 + 6 + 4];
@@ -147,13 +142,11 @@ mod tests {
 
     #[test]
     fn test_replicate_odd() {
-        let src = [
-            1,2, 3,4, 5, ];
+        let src = [1, 2, 3, 4, 5];
 
         let expected = [
-            2, 1,2,
-            /*---*/ 1,2, 3,4, 5,
-            /*---------------*/ 4, 5,4 ];
+            2, 1, 2, /*---*/ 1, 2, 3, 4, 5, /*---------------*/ 4, 5, 4,
+        ];
 
         let rdr = BorderReplicate8::new(5, 3);
         let mut buf = [0u8; 3 + 5 + 3];

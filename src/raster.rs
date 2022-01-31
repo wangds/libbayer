@@ -2,10 +2,10 @@
 
 use std::slice;
 
-use ::RasterMut;
+use crate::RasterMut;
 
 /// Depth of a raster.
-#[derive(Clone,Copy,Debug,Eq,PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum RasterDepth {
     Depth8,
     Depth16,
@@ -25,8 +25,7 @@ impl<'a> RasterMut<'a> {
     ///         IMG_W, IMG_H, bayer::RasterDepth::Depth8,
     ///         &mut buf);
     /// ```
-    pub fn new(w: usize, h: usize, depth: RasterDepth, buf: &'a mut [u8])
-            -> Self {
+    pub fn new(w: usize, h: usize, depth: RasterDepth, buf: &'a mut [u8]) -> Self {
         let bytes_per_pixel = depth.bytes_per_pixel();
         let stride = w.checked_mul(bytes_per_pixel).expect("overflow");
         Self::with_offset(0, 0, w, h, stride, depth, buf)
@@ -47,9 +46,14 @@ impl<'a> RasterMut<'a> {
     ///         &mut buf);
     /// ```
     pub fn with_offset(
-            x: usize, y: usize, w: usize, h: usize, stride: usize,
-            depth: RasterDepth, buf: &'a mut [u8])
-            -> Self {
+        x: usize,
+        y: usize,
+        w: usize,
+        h: usize,
+        stride: usize,
+        depth: RasterDepth,
+        buf: &'a mut [u8],
+    ) -> Self {
         let x1 = x.checked_add(w).expect("overflow");
         let y1 = y.checked_add(h).expect("overflow");
         let bytes_per_pixel = depth.bytes_per_pixel();
@@ -58,7 +62,13 @@ impl<'a> RasterMut<'a> {
         assert_eq!(stride % bytes_per_pixel, 0);
 
         RasterMut {
-            x, y, w, h, stride, depth, buf,
+            x,
+            y,
+            w,
+            h,
+            stride,
+            depth,
+            buf,
         }
     }
 
@@ -67,8 +77,7 @@ impl<'a> RasterMut<'a> {
     /// # Panics
     ///
     /// Panics if the raster is not 8-bpp.
-    pub fn borrow_row_u8_mut(&mut self, y: usize)
-            -> &mut [u8] {
+    pub fn borrow_row_u8_mut(&mut self, y: usize) -> &mut [u8] {
         assert!(self.depth == RasterDepth::Depth8);
         assert!(y < self.h);
 
@@ -83,8 +92,7 @@ impl<'a> RasterMut<'a> {
     /// # Panics
     ///
     /// Panics if the raster is not 16-bpp.
-    pub fn borrow_row_u16_mut(&mut self, y: usize)
-            -> &mut [u16] {
+    pub fn borrow_row_u16_mut(&mut self, y: usize) -> &mut [u16] {
         assert!(self.depth == RasterDepth::Depth16);
         assert!(y < self.h);
 
@@ -93,9 +101,7 @@ impl<'a> RasterMut<'a> {
         let end = start + bytes_per_pixel * self.w;
         let s = &mut self.buf[start..end];
 
-        unsafe {
-            slice::from_raw_parts_mut(s.as_mut_ptr() as *mut u16, 3 * self.w)
-        }
+        unsafe { slice::from_raw_parts_mut(s.as_mut_ptr() as *mut u16, 3 * self.w) }
     }
 }
 
@@ -111,32 +117,34 @@ impl RasterDepth {
 
 #[cfg(test)]
 mod tests {
-    use ::RasterMut;
     use super::RasterDepth;
+    use crate::RasterMut;
 
     #[test]
     #[should_panic]
     fn test_raster_mut_overflow() {
         let mut buf = [0; 1];
         let _ = RasterMut::new(
-                ::std::usize::MAX, ::std::usize::MAX, RasterDepth::Depth8, &mut buf);
+            ::std::usize::MAX,
+            ::std::usize::MAX,
+            RasterDepth::Depth8,
+            &mut buf,
+        );
     }
 
     #[test]
     fn test_borrow_row_u16_mut() {
         let expected = [
-            0x00,0x00, 0x01,0x01, 0x02,0x02,
-            0x03,0x03, 0x04,0x04, 0x05,0x05,
-            0x06,0x06, 0x07,0x07, 0x08,0x08,
-            0x09,0x09, 0x0A,0x0A, 0x0B,0x0B ];
+            0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03, 0x04, 0x04, 0x05, 0x05, 0x06, 0x06,
+            0x07, 0x07, 0x08, 0x08, 0x09, 0x09, 0x0A, 0x0A, 0x0B, 0x0B,
+        ];
 
         const IMG_W: usize = 4;
         const IMG_H: usize = 1;
         let mut buf = [0u8; 6 * IMG_W * IMG_H];
 
         {
-            let mut dst = RasterMut::new(
-                    IMG_W, IMG_H, RasterDepth::Depth16, &mut buf);
+            let mut dst = RasterMut::new(IMG_W, IMG_H, RasterDepth::Depth16, &mut buf);
             let row = dst.borrow_row_u16_mut(0);
 
             for (i, elt) in row.iter_mut().enumerate() {

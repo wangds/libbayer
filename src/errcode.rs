@@ -1,5 +1,6 @@
 //! Bayer error codes.
 
+use quick_error::quick_error;
 use std::io;
 
 pub type BayerResult<T> = Result<T, BayerError>;

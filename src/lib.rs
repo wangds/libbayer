@@ -1,22 +1,11 @@
-//! This crate provides routines for demosaicing Bayer raw images.
-
-extern crate byteorder;
-extern crate libc;
-
-#[cfg(feature = "rayon")]
-extern crate rayon;
-
-#[macro_use]
-extern crate quick_error;
-
+//! Routines for demosaicing Bayer sensor RAW images.
+pub use crate::{
+    bayer::{BayerDepth, CFA},
+    demosaic::Demosaic,
+    errcode::{BayerError, BayerResult},
+    raster::RasterDepth,
+};
 use std::io::Read;
-
-pub use bayer::BayerDepth;
-pub use bayer::CFA;
-pub use demosaic::Demosaic;
-pub use errcode::BayerError;
-pub use errcode::BayerResult;
-pub use raster::RasterDepth;
 
 /// Mutable raster structure.
 pub struct RasterMut<'a> {
@@ -54,16 +43,20 @@ mod raster;
 /// let mut dst = bayer::RasterMut::new(
 ///         width, height, bayer::RasterDepth::Depth8,
 ///         &mut buf);
+///
 /// bayer::run_demosaic(&mut Cursor::new(&img[..]),
 ///         bayer::BayerDepth::Depth8,
 ///         bayer::CFA::RGGB,
 ///         bayer::Demosaic::None,
 ///         &mut dst);
 /// ```
-pub fn run_demosaic(r: &mut Read,
-        depth: BayerDepth, cfa: CFA, alg: Demosaic,
-        dst: &mut RasterMut)
-        -> BayerResult<()> {
+pub fn run_demosaic(
+    r: &mut dyn Read,
+    depth: BayerDepth,
+    cfa: CFA,
+    alg: Demosaic,
+    dst: &mut RasterMut,
+) -> BayerResult<()> {
     match alg {
         Demosaic::None => demosaic::none::run(r, depth, cfa, dst),
         Demosaic::NearestNeighbour => demosaic::nearestneighbour::run(r, depth, cfa, dst),

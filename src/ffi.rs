@@ -1,13 +1,13 @@
 //! Foreign function interface.
 
-use std::io::{Cursor,Read};
+use libc::{c_uchar, c_uint, size_t};
+use std::io::{Cursor, Read};
 use std::mem;
 use std::ptr;
 use std::slice;
-use libc::{c_uchar,c_uint,size_t};
 
-use ::{BayerDepth,BayerError,BayerResult,CFA,RasterDepth,RasterMut};
-use demosaic;
+use crate::demosaic;
+use crate::{BayerDepth, BayerError, BayerResult, RasterDepth, RasterMut, CFA};
 
 /// Dummy opaque structure, equivalent to RasterMut<'a>.
 pub struct CRasterMut;
@@ -23,19 +23,26 @@ macro_rules! printerrorln {
     }};
 }
 
-unsafe fn transmute_raster_mut<'a>(dst: *mut CRasterMut)
-        -> &'a mut RasterMut<'a> {
+unsafe fn transmute_raster_mut<'a>(dst: *mut CRasterMut) -> &'a mut RasterMut<'a> {
     let ptr: *mut RasterMut = mem::transmute(dst);
     &mut *ptr
 }
 
-fn run_demosaic<F>(file: &'static str, line: u32,
-        run: F,
-        src: *const c_uchar, src_len: size_t,
-        depth: c_uint, be: c_uint, cfa: c_uint,
-        dst: *mut CRasterMut)
-        -> c_uint
-        where F: FnOnce(&mut Read, BayerDepth, CFA, &mut RasterMut) -> BayerResult<()> {
+#[allow(clippy::too_many_arguments)]
+fn run_demosaic<F>(
+    file: &'static str,
+    line: u32,
+    run: F,
+    src: *const c_uchar,
+    src_len: size_t,
+    depth: c_uint,
+    be: c_uint,
+    cfa: c_uint,
+    dst: *mut CRasterMut,
+) -> c_uint
+where
+    F: FnOnce(&mut dyn Read, BayerDepth, CFA, &mut RasterMut) -> BayerResult<()>,
+{
     if src.is_null() || dst.is_null() {
         println!("{} {} - bad input parameters", file, line);
         return 1;
@@ -62,10 +69,10 @@ fn run_demosaic<F>(file: &'static str, line: u32,
         }
     };
 
-    let src_slice = unsafe{ slice::from_raw_parts(src, src_len) };
-    let dst_raster = unsafe{ transmute_raster_mut(dst) };
+    let src_slice = unsafe { slice::from_raw_parts(src, src_len) };
+    let dst_raster = unsafe { transmute_raster_mut(dst) };
 
-    match run(&mut Cursor::new(&src_slice[..]), depth, cfa, dst_raster) {
+    match run(&mut Cursor::new(src_slice), depth, cfa, dst_raster) {
         Ok(_) => 0,
         Err(BayerError::WrongResolution) => 2,
         Err(BayerError::WrongDepth) => 3,
@@ -80,49 +87,93 @@ fn run_demosaic<F>(file: &'static str, line: u32,
 /// Demosaicing without any interpolation.
 #[no_mangle]
 pub extern "C" fn bayerrs_demosaic_none(
-        src: *const c_uchar, src_len: size_t,
-        depth: c_uint, be: c_uint, cfa: c_uint,
-        dst: *mut CRasterMut)
-        -> c_uint {
-    run_demosaic(file!(), line!(),
-            demosaic::none::run,
-            src, src_len, depth, be, cfa, dst)
+    src: *const c_uchar,
+    src_len: size_t,
+    depth: c_uint,
+    be: c_uint,
+    cfa: c_uint,
+    dst: *mut CRasterMut,
+) -> c_uint {
+    run_demosaic(
+        file!(),
+        line!(),
+        demosaic::none::run,
+        src,
+        src_len,
+        depth,
+        be,
+        cfa,
+        dst,
+    )
 }
 
 /// Demosaicing using nearest neighbour interpolation.
 #[no_mangle]
 pub extern "C" fn bayerrs_demosaic_nearest_neighbour(
-        src: *const c_uchar, src_len: size_t,
-        depth: c_uint, be: c_uint, cfa: c_uint,
-        dst: *mut CRasterMut)
-        -> c_uint {
-    run_demosaic(file!(), line!(),
-            demosaic::nearestneighbour::run,
-            src, src_len, depth, be, cfa, dst)
+    src: *const c_uchar,
+    src_len: size_t,
+    depth: c_uint,
+    be: c_uint,
+    cfa: c_uint,
+    dst: *mut CRasterMut,
+) -> c_uint {
+    run_demosaic(
+        file!(),
+        line!(),
+        demosaic::nearestneighbour::run,
+        src,
+        src_len,
+        depth,
+        be,
+        cfa,
+        dst,
+    )
 }
 
 /// Demosaicing using linear interpolation.
 #[no_mangle]
 pub extern "C" fn bayerrs_demosaic_linear(
-        src: *const c_uchar, src_len: size_t,
-        depth: c_uint, be: c_uint, cfa: c_uint,
-        dst: *mut CRasterMut)
-        -> c_uint {
-    run_demosaic(file!(), line!(),
-            demosaic::linear::run,
-            src, src_len, depth, be, cfa, dst)
+    src: *const c_uchar,
+    src_len: size_t,
+    depth: c_uint,
+    be: c_uint,
+    cfa: c_uint,
+    dst: *mut CRasterMut,
+) -> c_uint {
+    run_demosaic(
+        file!(),
+        line!(),
+        demosaic::linear::run,
+        src,
+        src_len,
+        depth,
+        be,
+        cfa,
+        dst,
+    )
 }
 
 /// Demosaicing using cubic interpolation.
 #[no_mangle]
 pub extern "C" fn bayerrs_demosaic_cubic(
-        src: *const c_uchar, src_len: size_t,
-        depth: c_uint, be: c_uint, cfa: c_uint,
-        dst: *mut CRasterMut)
-        -> c_uint {
-    run_demosaic(file!(), line!(),
-            demosaic::cubic::run,
-            src, src_len, depth, be, cfa, dst)
+    src: *const c_uchar,
+    src_len: size_t,
+    depth: c_uint,
+    be: c_uint,
+    cfa: c_uint,
+    dst: *mut CRasterMut,
+) -> c_uint {
+    run_demosaic(
+        file!(),
+        line!(),
+        demosaic::cubic::run,
+        src,
+        src_len,
+        depth,
+        be,
+        cfa,
+        dst,
+    )
 }
 
 /*--------------------------------------------------------------*/
@@ -131,10 +182,16 @@ pub extern "C" fn bayerrs_demosaic_cubic(
 
 /// Allocate a new raster.
 #[no_mangle]
-pub extern "C" fn bayerrs_raster_mut_alloc(
-        x: size_t, y: size_t, w: size_t, h: size_t, stride: size_t, depth: c_uint,
-        buf: *mut c_uchar, buf_len: size_t)
-        -> *mut CRasterMut {
+pub unsafe extern "C" fn bayerrs_raster_mut_alloc(
+    x: size_t,
+    y: size_t,
+    w: size_t,
+    h: size_t,
+    stride: size_t,
+    depth: c_uint,
+    buf: *mut c_uchar,
+    buf_len: size_t,
+) -> *mut CRasterMut {
     if buf.is_null() {
         printerrorln!("bad input parameters");
         return ptr::null_mut();
@@ -149,20 +206,20 @@ pub extern "C" fn bayerrs_raster_mut_alloc(
         }
     };
 
-    let buf_slice = unsafe{ slice::from_raw_parts_mut(buf, buf_len) };
+    let buf_slice = slice::from_raw_parts_mut(buf, buf_len);
     let raster = RasterMut::with_offset(x, y, w, h, stride, depth, buf_slice);
     let rptr = Box::into_raw(Box::new(raster));
-    let cptr: *mut CRasterMut = unsafe{ mem::transmute(rptr) };
+    let cptr: *mut CRasterMut = mem::transmute(rptr);
     cptr
 }
 
 /// Free a previously allocated raster.
 #[no_mangle]
-pub extern "C" fn bayerrs_raster_mut_free(raster: *mut CRasterMut) {
+pub unsafe extern "C" fn bayerrs_raster_mut_free(raster: *mut CRasterMut) {
     if raster.is_null() {
         return;
     }
 
-    let rptr: *mut RasterMut = unsafe{ mem::transmute(raster) };
-    let _raster = unsafe{ Box::from_raw(rptr) };
+    let rptr: *mut RasterMut = mem::transmute(raster);
+    let _raster = Box::from_raw(rptr);
 }
