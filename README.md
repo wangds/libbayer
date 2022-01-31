@@ -1,25 +1,22 @@
+# `bayer` – Demoisaicing RAW Images From Bayer Sensors
 
-LibBayer [![Version][version-img]][version-url] [![Status][travis-ci-img]][travis-ci-url]
-========
+[![Version][version-img]][version-url] [![Status][travis-ci-img]][travis-ci-url]
 
+## About
 
-# About
+Routines for demosaicing Bayer sensor (RAW) images.
 
-The `bayer` crate provides routines for demosaicing Bayer sensor (RAW)
-images.
-
-The library supports 8-bit and 16-bit images.
+Both 8-bit and 16-bit images are supported.
 
 Several demosaicing algorithms are available.  See the `src/demosaic`
 directory for a list and their individual descriptions.  Pixels on the
 border of the image are retained by replicating or mirroring the data
 in the neighbourhood.
 
-`bayer` is written entirely in Rust.  C bindings to the underlying
+The crate is written entirely in Rust.  C bindings to the underlying
 algorithms are provided.
 
-
-# Examples
+## Examples
 
 An example program is provided in the `examples/` directory:
 
@@ -47,8 +44,7 @@ cargo run --release --example showbayer <width> <height> <depth> <example.raw>
 Change the colour filter array (CFA) pattern and the demosaicing
 algorithm from inside the example program.
 
-# Basic Usage
-
+## Basic Usage
 
 Add `bayer` as a dependency to your project's `Cargo.toml`:
 
@@ -92,12 +88,11 @@ Note that many cameras will capture 12-bits per pixel (channel), but
 store the data as 16-bits per pixel.  These should be treated as
 16-bits per pixel for the purposes of this library.
 
-# Documentation
+## Documentation
 
 * [Documentation][documentation].
 
-
-# Author
+## Author
 
 David Wang
 

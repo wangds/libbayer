@@ -21,9 +21,7 @@ impl<'a> RasterMut<'a> {
     /// const IMG_H: usize = 200;
     /// let mut buf = [0; 3 * IMG_W * IMG_H];
     ///
-    /// bayer::RasterMut::new(
-    ///         IMG_W, IMG_H, bayer::RasterDepth::Depth8,
-    ///         &mut buf);
+    /// bayer::RasterMut::new(IMG_W, IMG_H, bayer::RasterDepth::Depth8, &mut buf);
     /// ```
     pub fn new(w: usize, h: usize, depth: RasterDepth, buf: &'a mut [u8]) -> Self {
         let bytes_per_pixel = depth.bytes_per_pixel();
@@ -42,8 +40,14 @@ impl<'a> RasterMut<'a> {
     /// let mut buf = [0; 3 * IMG_W * IMG_H];
     ///
     /// bayer::RasterMut::with_offset(
-    ///         0, 0, IMG_W, IMG_H, 3 * IMG_W, bayer::RasterDepth::Depth8,
-    ///         &mut buf);
+    ///     0,
+    ///     0,
+    ///     IMG_W,
+    ///     IMG_H,
+    ///     3 * IMG_W,
+    ///     bayer::RasterDepth::Depth8,
+    ///     &mut buf,
+    /// );
     /// ```
     pub fn with_offset(
         x: usize,

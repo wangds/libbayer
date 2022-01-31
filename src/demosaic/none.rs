@@ -63,7 +63,7 @@ macro_rules! apply_kernel_g {
     }};
 }
 
-/*--------------------------------------------------------------*/
+/* -------------------------------------------------------------- */
 
 fn debayer_u8(r: &mut dyn Read, cfa: CFA, dst: &mut RasterMut) -> BayerResult<()> {
     let (w, h) = (dst.w, dst.h);
@@ -111,7 +111,8 @@ mod tests {
 
     #[test]
     fn test_even() {
-        // R: set.seed(0); matrix(floor(runif(n=16, min=0, max=256)), nrow=4, byrow=TRUE)
+        // R: set.seed(0); matrix(floor(runif(n=16, min=0, max=256)), nrow=4,
+        // byrow=TRUE)
         let src = [
             229, 67, 95, 146, 232, 51, 229, 241, 169, 161, 15, 52, 45, 175, 98, 197,
         ];

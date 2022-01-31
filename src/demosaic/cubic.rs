@@ -141,9 +141,9 @@ macro_rules! apply_kernel_g {
     }};
 }
 
-/*--------------------------------------------------------------*/
-/* Rayon                                                        */
-/*--------------------------------------------------------------*/
+/* -------------------------------------------------------------- */
+/* Rayon */
+/* -------------------------------------------------------------- */
 
 #[cfg(feature = "rayon")]
 #[allow(unused_parens)]
@@ -169,8 +169,7 @@ fn debayer_u8(r: &mut dyn Read, cfa: CFA, dst: &mut RasterMut) -> BayerResult<()
         {
             let (src, bottom) = data.split_at_mut(stride * (h + PADDING));
             let yy = PADDING + h;
-            bottom[..stride]
-                .copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
+            bottom[..stride].copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
             bottom[stride..(stride * 2)]
                 .copy_from_slice(&src[(stride * (yy - 3))..(stride * (yy - 2))]);
             bottom[(stride * 2)..(stride * 3)]
@@ -227,8 +226,7 @@ fn debayer_u16(r: &mut dyn Read, be: bool, cfa: CFA, dst: &mut RasterMut) -> Bay
         {
             let (src, bottom) = data.split_at_mut(stride * (h + PADDING));
             let yy = PADDING + h;
-            bottom[..stride]
-                .copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
+            bottom[..stride].copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
             bottom[stride..(stride * 2)]
                 .copy_from_slice(&src[(stride * (yy - 3))..(stride * (yy - 2))]);
             bottom[(stride * 2)..(stride * 3)]
@@ -258,9 +256,9 @@ fn debayer_u16(r: &mut dyn Read, be: bool, cfa: CFA, dst: &mut RasterMut) -> Bay
     Ok(())
 }
 
-/*--------------------------------------------------------------*/
-/* Naive                                                        */
-/*--------------------------------------------------------------*/
+/* -------------------------------------------------------------- */
+/* Naive */
+/* -------------------------------------------------------------- */
 
 #[cfg(not(feature = "rayon"))]
 #[allow(unused_parens)]
@@ -398,7 +396,8 @@ mod tests {
 
     #[test]
     fn test_even() {
-        // R: set.seed(0); matrix(floor(runif(n=64, min=0, max=256)), nrow=8, byrow=TRUE)
+        // R: set.seed(0); matrix(floor(runif(n=64, min=0, max=256)), nrow=8,
+        // byrow=TRUE)
         let src = [
             229, 67, 95, 146, 232, 51, 229, 241, 169, 161, 15, 52, 45, 175, 98, 197, 127, 183, 253,
             97, 199, 239, 54, 166, 32, 68, 98, 3, 97, 222, 87, 123, 153, 126, 47, 211, 171, 203,
@@ -435,7 +434,8 @@ mod tests {
 
     #[test]
     fn test_odd() {
-        // R: set.seed(0); matrix(floor(runif(n=49, min=0, max=256)), nrow=7, byrow=TRUE)
+        // R: set.seed(0); matrix(floor(runif(n=49, min=0, max=256)), nrow=7,
+        // byrow=TRUE)
         let src = [
             229, 67, 95, 146, 232, 51, 229, 241, 169, 161, 15, 52, 45, 175, 98, 197, 127, 183, 253,
             97, 199, 239, 54, 166, 32, 68, 98, 3, 97, 222, 87, 123, 153, 126, 47, 211, 171, 203,

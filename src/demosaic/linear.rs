@@ -94,9 +94,9 @@ macro_rules! apply_kernel_g {
     }};
 }
 
-/*--------------------------------------------------------------*/
-/* Rayon                                                        */
-/*--------------------------------------------------------------*/
+/* -------------------------------------------------------------- */
+/* Rayon */
+/* -------------------------------------------------------------- */
 
 #[cfg(feature = "rayon")]
 fn debayer_u8(r: &mut dyn Read, cfa: CFA, dst: &mut RasterMut) -> BayerResult<()> {
@@ -120,8 +120,7 @@ fn debayer_u8(r: &mut dyn Read, cfa: CFA, dst: &mut RasterMut) -> BayerResult<()
         {
             let (src, bottom) = data.split_at_mut(stride * (h + PADDING));
             let yy = PADDING + h;
-            bottom[..stride]
-                .copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
+            bottom[..stride].copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
         }
     }
 
@@ -167,8 +166,7 @@ fn debayer_u16(r: &mut dyn Read, be: bool, cfa: CFA, dst: &mut RasterMut) -> Bay
         {
             let (src, bottom) = data.split_at_mut(stride * (h + PADDING));
             let yy = PADDING + h;
-            bottom[..stride]
-                .copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
+            bottom[..stride].copy_from_slice(&src[(stride * (yy - 2))..(stride * (yy - 1))]);
         }
     }
 
@@ -190,9 +188,9 @@ fn debayer_u16(r: &mut dyn Read, be: bool, cfa: CFA, dst: &mut RasterMut) -> Bay
     Ok(())
 }
 
-/*--------------------------------------------------------------*/
-/* Naive                                                        */
-/*--------------------------------------------------------------*/
+/* -------------------------------------------------------------- */
+/* Naive */
+/* -------------------------------------------------------------- */
 
 #[cfg(not(feature = "rayon"))]
 fn debayer_u8(r: &mut Read, cfa: CFA, dst: &mut RasterMut) -> BayerResult<()> {
@@ -280,7 +278,8 @@ mod tests {
 
     #[test]
     fn test_even() {
-        // R: set.seed(0); matrix(floor(runif(n=16, min=0, max=256)), nrow=4, byrow=TRUE)
+        // R: set.seed(0); matrix(floor(runif(n=16, min=0, max=256)), nrow=4,
+        // byrow=TRUE)
         let src = [
             229, 67, 95, 146, 232, 51, 229, 241, 169, 161, 15, 52, 45, 175, 98, 197,
         ];
