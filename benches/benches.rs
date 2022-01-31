@@ -4,9 +4,6 @@
 
 #[cfg(all(feature = "bench", test))]
 mod bench {
-    //   extern crate bayer;
-    //extern crate test;
-
     use self::bayer::*;
     use std::io::Cursor;
 

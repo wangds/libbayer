@@ -129,7 +129,7 @@ mod tests {
         let src = [1, 2, 3, 4, 5, 6];
 
         let expected = [
-            1, 2, 1, 2, /* ----- */ 1, 2, 3, 4, 5, 6, /* -------------------- */ 5, 6, 5, 6,
+            1, 2, 1, 2, /* - */ 1, 2, 3, 4, 5, 6, /* - */ 5, 6, 5, 6,
         ];
 
         let rdr = BorderReplicate8::new(6, 4);
@@ -144,9 +144,7 @@ mod tests {
     fn test_replicate_odd() {
         let src = [1, 2, 3, 4, 5];
 
-        let expected = [
-            2, 1, 2, /* --- */ 1, 2, 3, 4, 5, /* --------------- */ 4, 5, 4,
-        ];
+        let expected = [2, 1, 2, /* - */ 1, 2, 3, 4, 5, /* - */ 4, 5, 4];
 
         let rdr = BorderReplicate8::new(5, 3);
         let mut buf = [0u8; 3 + 5 + 3];
