@@ -1,8 +1,6 @@
-# `bayer` – Demoisaicing RAW Images From Bayer Sensors
+# `bayer`
 
 [![Version][version-img]][version-url] [![Status][travis-ci-img]][travis-ci-url]
-
-## About
 
 Routines for demosaicing Bayer sensor (RAW) images.
 
@@ -18,18 +16,10 @@ algorithms are provided.
 
 ## Examples
 
-An example program is provided in the `examples/` directory:
-
 * `showbayer` – a simple Bayer file viewer.
 * `writebayer` – converts an image to a raw Bayer image file.
 
-To clone this repository, run:
-
-```sh
-git clone https://github.com/wangds/libbayer.git
-```
-
-Then build the library and run the example programs using Cargo.
+Run the examples programs using `cargo`.
 
 ```sh
 cargo build --release --example showbayer
