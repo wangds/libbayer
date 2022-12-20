@@ -9,7 +9,7 @@ use std::slice;
 use crate::demosaic;
 use crate::{BayerDepth, BayerError, BayerResult, RasterDepth, RasterMut, CFA};
 
-/// Dummy opaque structure, equivalent to RasterMut<'a>.
+/// Dummy opaque structure, equivalent to [`RasterMut`].
 pub struct CRasterMut;
 
 // Print with "file:line - " prefix, for more informative error messages.
@@ -44,7 +44,7 @@ where
     F: FnOnce(&mut dyn Read, BayerDepth, CFA, &mut RasterMut) -> BayerResult<()>,
 {
     if src.is_null() || dst.is_null() {
-        println!("{} {} - bad input parameters", file, line);
+        println!("{file} {line} - bad input parameters");
         return 1;
     }
 
@@ -53,7 +53,7 @@ where
         (16, 0) => BayerDepth::Depth16LE,
         (16, _) => BayerDepth::Depth16BE,
         _ => {
-            println!("{} {} - invalid depth", file, line);
+            println!("{file} {line} - invalid depth");
             return 2;
         }
     };
@@ -64,7 +64,7 @@ where
         2 => CFA::GRBG,
         3 => CFA::RGGB,
         _ => {
-            println!("{} {} - invalid cfa", file, line);
+            println!("{file} {line} - invalid cfa");
             return 1;
         }
     };
@@ -85,6 +85,11 @@ where
 /* -------------------------------------------------------------- */
 
 /// Demosaicing without any interpolation.
+///
+/// Before using this, allocate a [`CRasterMut`] for `dst` by calling
+/// [`bayerrs_raster_mut_alloc()`].
+///
+/// This modifies the [`buf`] you passed in the aforementioned call.
 #[no_mangle]
 pub extern "C" fn bayerrs_demosaic_none(
     src: *const c_uchar,
@@ -180,7 +185,19 @@ pub extern "C" fn bayerrs_demosaic_cubic(
 /* Raster */
 /* -------------------------------------------------------------- */
 
-/// Allocate a new raster.
+/// Allocate a new [`CRasterMut`].
+///
+/// # Safety
+///
+/// The `buf` point to a region of memory with at least `buf_len` size and big
+/// enough to hold the geometry described by the first six parameters.
+///
+/// Otherwise calling any of the `bayerrs_demosaic...()` functions on the
+/// resulting [`CRasterMut`] pointer will cause undefined behaviour.
+///
+/// When you are done with the returned `CRasterMut`, pass it to
+/// [`bayerrs_raster_mut_free()`] to deallocate the memoriy it points to.
+/// Otherwise calling this function will leak.
 #[no_mangle]
 pub unsafe extern "C" fn bayerrs_raster_mut_alloc(
     x: size_t,
@@ -213,7 +230,15 @@ pub unsafe extern "C" fn bayerrs_raster_mut_alloc(
     cptr
 }
 
-/// Free a previously allocated raster.
+/// Free a previously allocated [`CRasterMut`].
+///
+/// # Safety
+///
+/// This will do nothing if `raster` is a null pointer.
+///
+/// The `raster` pointer was must have been initialized from calling
+/// [`bayerrs_raster_mut_alloc()`] initially. Otherwise calling this function
+/// will cause undefined behaviour.
 #[no_mangle]
 pub unsafe extern "C" fn bayerrs_raster_mut_free(raster: *mut CRasterMut) {
     if raster.is_null() {
