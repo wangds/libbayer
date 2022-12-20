@@ -76,11 +76,11 @@ impl<'a> RasterMut<'a> {
         }
     }
 
-    /// Borrow a mutable u8 row slice.
+    /// Borrow a mutable [`u8`] row slice.
     ///
     /// # Panics
     ///
-    /// Panics if the raster is not 8-bpp.
+    /// Panics if the raster is not 8 bit per pixel.
     pub fn borrow_row_u8_mut(&mut self, y: usize) -> &mut [u8] {
         assert!(self.depth == RasterDepth::Depth8);
         assert!(y < self.h);
@@ -91,11 +91,11 @@ impl<'a> RasterMut<'a> {
         &mut self.buf[start..end]
     }
 
-    /// Borrow a mutable u16 row slice.
+    /// Borrow a mutable [`u16`] row slice.
     ///
     /// # Panics
     ///
-    /// Panics if the raster is not 16-bpp.
+    /// Panics if the raster is not 16 bit per pixel.
     pub fn borrow_row_u16_mut(&mut self, y: usize) -> &mut [u16] {
         assert!(self.depth == RasterDepth::Depth16);
         assert!(y < self.h);

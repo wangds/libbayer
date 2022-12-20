@@ -1,11 +1,10 @@
 //! Routines for demosaicing Bayer sensor (RAW) images.
 //!
-//! Both 8-bit and 16-bit images are supported.
+//! Both 8bit and 16bit images are supported.
 //!
 //! Several demosaicing algorithms are available. Pixels on the border
 //! of the image are retained by replicating or mirroring the data in
 //! the neighbourhood.
-//!
 //!
 //! ## Examples
 //!
@@ -40,8 +39,8 @@
 //! bayer::run_demosaic(&mut file, bayer::BayerDepth:Depth8, cfa, alg, &mut dst);
 //! ```
 //!
-//! Note that many cameras will capture 12-bits per pixel (channel), but
-//! store the data as 16-bits per pixel.  These should be treated as
+//! Note that many cameras will capture 12bits per pixel (channel), but
+//! store the data as 16 bits per pixel.  These should be treated as
 //! 16-bits per pixel for the purposes of this library.
 pub use crate::{
     bayer::{BayerDepth, CFA},
@@ -86,7 +85,7 @@ mod raster;
 ///
 /// let mut dst = bayer::RasterMut::new(width, height, bayer::RasterDepth::Depth8, &mut buf);
 ///
-/// bayer::run_demosaic(
+/// bayer::demosaic(
 ///     &mut Cursor::new(&img[..]),
 ///     bayer::BayerDepth::Depth8,
 ///     bayer::CFA::RGGB,
@@ -94,7 +93,7 @@ mod raster;
 ///     &mut dst,
 /// );
 /// ```
-pub fn run_demosaic(
+pub fn demosaic(
     r: &mut dyn Read,
     depth: BayerDepth,
     cfa: CFA,

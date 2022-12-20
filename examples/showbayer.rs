@@ -283,7 +283,7 @@ fn read_file(
     let maybe_file = File::open(path);
     match maybe_file {
         Ok(mut f) => {
-            let result = run_demosaic(
+            let result = demosaic(
                 &mut f,
                 bayer_depth(depth),
                 cfa,
