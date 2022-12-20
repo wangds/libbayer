@@ -1,6 +1,6 @@
 [package]
 name = "bayer"
-version = "0.1.6"
+version = "0.2.0"
 edition = "2021"
 authors = ["David Wang <millimillenary@gmail.com>"]
 homepage = "https://github.com/wangds/libbayer.git"
@@ -25,13 +25,13 @@ bench = []
 
 [dependencies]
 byteorder = "1.4.3"
-libc = "0.2.116"
-rayon = { version = "1.5.1", optional = true }
-quick-error = "1.2"
+libc = "0.2.138"
+rayon = { version = "1.6.1", optional = true }
+quick-error = "2"
 
 [dev-dependencies]
 flic = "0.1.6"
-sdl2 = { version = "0.35.1", features = ["image"] }
+sdl2 = { version = "0.35.2", features = ["image"] }
 
 [badges]
-travis-ci = { repository = "wangds/libbayer" }
+travis-ci = { repository = "virtualritz/libbayer" }

@@ -6,27 +6,22 @@ use std::io;
 pub type BayerResult<T> = Result<T, BayerError>;
 
 quick_error! {
+    #[derive(Debug)]
+    pub enum BayerError {
+        NoGood {
+            display("No good")
+        }
 
-#[derive(Debug)]
-pub enum BayerError {
-    // Generic failure.  Please try to make something more meaningful.
-    NoGood {
-        description("No good")
-    }
+        WrongResolution {
+            display("Wrong resolution")
+        }
+        WrongDepth {
+            display("Wrong depth")
+        }
 
-    WrongResolution {
-        description("Wrong resolution")
+        Io(err: io::Error) {
+            from()
+            display("IO error: {}", err)
+        }
     }
-    WrongDepth {
-        description("Wrong depth")
-    }
-
-    Io(err: io::Error) {
-        from()
-        description(err.description())
-        display("IO error: {}", err)
-        cause(err)
-    }
-}
-
 }
