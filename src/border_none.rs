@@ -2,8 +2,8 @@
 
 use std::io::Read;
 
-use ::BayerResult;
-use bayer::*;
+use crate::bayer::*;
+use crate::BayerResult;
 
 pub struct BorderNone8;
 pub struct BorderNone16BE;
@@ -16,8 +16,7 @@ impl BorderNone8 {
 }
 
 impl BayerRead8 for BorderNone8 {
-    fn read_line(&self, r: &mut Read, dst: &mut [u8])
-            -> BayerResult<()> {
+    fn read_line(&self, r: &mut dyn Read, dst: &mut [u8]) -> BayerResult<()> {
         read_exact_u8(r, dst)
     }
 }
@@ -29,8 +28,7 @@ impl BorderNone16BE {
 }
 
 impl BayerRead16 for BorderNone16BE {
-    fn read_line(&self, r: &mut Read, dst: &mut [u16])
-            -> BayerResult<()> {
+    fn read_line(&self, r: &mut dyn Read, dst: &mut [u16]) -> BayerResult<()> {
         read_exact_u16be(r, dst)
     }
 }
@@ -42,8 +40,7 @@ impl BorderNone16LE {
 }
 
 impl BayerRead16 for BorderNone16LE {
-    fn read_line(&self, r: &mut Read, dst: &mut [u16])
-            -> BayerResult<()> {
+    fn read_line(&self, r: &mut dyn Read, dst: &mut [u16]) -> BayerResult<()> {
         read_exact_u16le(r, dst)
     }
 }

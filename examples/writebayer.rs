@@ -4,12 +4,12 @@ extern crate bayer;
 extern crate flic;
 extern crate sdl2;
 
+use sdl2::image::LoadSurface;
+use sdl2::surface::Surface;
 use std::env;
 use std::fs::File;
 use std::io::Write;
-use std::path::{Path,PathBuf};
-use sdl2::image::LoadSurface;
-use sdl2::surface::Surface;
+use std::path::{Path, PathBuf};
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
@@ -19,8 +19,10 @@ fn main() {
         return;
     }
 
-    sdl2::image::init(sdl2::image::INIT_JPG | sdl2::image::INIT_PNG | sdl2::image::INIT_TIF)
-        .unwrap();
+    sdl2::image::init(
+        sdl2::image::InitFlag::JPG | sdl2::image::InitFlag::PNG | sdl2::image::InitFlag::TIF,
+    )
+    .unwrap();
 
     let cfa = parse_cfa(&args[0]);
     let files = &args[1..];
@@ -45,8 +47,10 @@ fn main() {
             let mut buf = vec![0; w * h];
             let mut pal = vec![0; 3 * 256];
 
-            if flic.read_next_frame(
-                    &mut flic::RasterMut::new(w, h, &mut buf, &mut pal)).is_err() {
+            if flic
+                .read_next_frame(&mut flic::RasterMut::new(w, h, &mut buf, &mut pal))
+                .is_err()
+            {
                 continue;
             }
 
@@ -85,8 +89,7 @@ fn parse_cfa(s: &String) -> bayer::CFA {
     }
 }
 
-fn write_mosaic_rgba(dst: &PathBuf,
-        s: &[u8], w: usize, h: usize, cfa: bayer::CFA) {
+fn write_mosaic_rgba(dst: &PathBuf, s: &[u8], w: usize, h: usize, cfa: bayer::CFA) {
     let mut v = Vec::with_capacity(w * h);
     let mut cfa_y = cfa;
 
@@ -95,12 +98,9 @@ fn write_mosaic_rgba(dst: &PathBuf,
 
         for x in 0..w {
             let c = match cfa_x {
-                bayer::CFA::BGGR =>
-                    s[4 * w * y + 4 * x + 2],
-                bayer::CFA::GBRG | bayer::CFA::GRBG =>
-                    s[4 * w * y + 4 * x + 1],
-                bayer::CFA::RGGB =>
-                    s[4 * w * y + 4 * x + 0],
+                bayer::CFA::BGGR => s[4 * w * y + 4 * x + 2],
+                bayer::CFA::GBRG | bayer::CFA::GRBG => s[4 * w * y + 4 * x + 1],
+                bayer::CFA::RGGB => s[4 * w * y + 4 * x + 0],
             };
 
             v.push(c);
@@ -116,8 +116,7 @@ fn write_mosaic_rgba(dst: &PathBuf,
     }
 }
 
-fn write_mosaic_pal(dst: &PathBuf,
-        buf: &[u8], pal: &[u8], w: usize, h: usize, cfa: bayer::CFA) {
+fn write_mosaic_pal(dst: &PathBuf, buf: &[u8], pal: &[u8], w: usize, h: usize, cfa: bayer::CFA) {
     let mut v = Vec::with_capacity(w * h);
     let mut cfa_y = cfa;
 
@@ -126,12 +125,9 @@ fn write_mosaic_pal(dst: &PathBuf,
 
         for x in 0..w {
             let c = match cfa_x {
-                bayer::CFA::BGGR =>
-                    pal[3 * buf[w * y + x] as usize + 2],
-                bayer::CFA::GBRG | bayer::CFA::GRBG =>
-                    pal[3 * buf[w * y + x] as usize + 1],
-                bayer::CFA::RGGB =>
-                    pal[3 * buf[w * y + x] as usize + 0],
+                bayer::CFA::BGGR => pal[3 * buf[w * y + x] as usize + 2],
+                bayer::CFA::GBRG | bayer::CFA::GRBG => pal[3 * buf[w * y + x] as usize + 1],
+                bayer::CFA::RGGB => pal[3 * buf[w * y + x] as usize + 0],
             };
 
             v.push(c);
